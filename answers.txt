@@ -1,0 +1,263 @@
+ASIIMWE BRIAN GITA
+Python CSE 
+22/04/2025
+
+-----------------   TASK 1 ----------------------------------------------------------------
+------------------- SETUP.PY Code ----------------------------------------------------------
+import sqlite3
+
+conn = sqlite3.connect('nyondo_stock.db')
+
+conn.execute('''
+CREATE TABLE IF NOT EXISTS products (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    description TEXT,
+    price REAL NOT NULL
+)
+''')
+
+conn.executemany(
+    'INSERT INTO products (name, description, price) VALUES (?, ?, ?)',
+    [
+        ('Cement (bag)', 'Portland cement 50kg bag', 35000),
+        ('Iron Sheet 3m', 'Gauge 30 roofing sheet 3m long', 110000),
+        ('Paint 5L', 'Exterior wall paint white 5L', 60000),
+        ('Nails 1kg', 'Common wire nails 1kg pack', 12000),
+        ('Timber 2x4', 'Pine timber plank 2x4 per metre', 25000),
+    ]
+)
+
+conn.commit()
+
+rows = conn.execute('SELECT * FROM products').fetchall()
+for r in rows:
+    print(r)
+
+----------------------------------- Create Table statement -----------------------------------------
+
+CREATE TABLE IF NOT EXISTS products (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    description TEXT,
+    price REAL NOT NULL
+)
+
+----------------------------------- insert statement ------------------------------------------------
+'INSERT INTO products (name, description, price) VALUES (?, ?, ?)',
+    [
+        ('Cement (bag)', 'Portland cement 50kg bag', 35000),
+        ('Iron Sheet 3m', 'Gauge 30 roofing sheet 3m long', 110000),
+        ('Paint 5L', 'Exterior wall paint white 5L', 60000),
+        ('Nails 1kg', 'Common wire nails 1kg pack', 12000),
+        ('Timber 2x4', 'Pine timber plank 2x4 per metre', 25000),
+    ]
+
+------------------------output from SELECT * Showing all the five products ---------------------------
+(1, 'Cement (bag)', 'Portland cement 50kg bag', 35000.0)
+(2, 'Iron Sheet 3m', 'Gauge 30 roofing sheet 3m long', 110000.0)
+(3, 'Paint 5L', 'Exterior wall paint white 5L', 60000.0)
+(4, 'Nails 1kg', 'Common wire nails 1kg pack', 12000.0)
+(5, 'Timber 2x4', 'Pine timber plank 2x4 per metre', 25000.0)
+
+-----------------   TASK 2 ---------------------------------------------------------------------------
+
+import sqlite3
+
+conn = sqlite3.connect('nyondo_stock.db')
+cursor = conn.cursor()
+
+#------ Query A -------------get every column of every product
+print("Query A")
+rows = cursor.execute("SELECT * FROM products").fetchall()
+for row in rows:
+    print(row)
+print()
+
+Query A output
+(1, 'Cement (bag)', 'Portland cement 50kg bag', 38000.0)
+(2, 'Iron Sheet 3m', 'Gauge 30 roofing sheet 3m long', 110000.0)
+(3, 'Paint 5L', 'Exterior wall paint white 5L', 60000.0)
+(4, 'Nails 1kg', 'Common wire nails 1kg pack', 12000.0)
+(5, 'Timber 2x4', 'Pine timber plank 2x4 per metre', 25000.0)
+
+
+#------ Query B ------------get the name and price of every product
+print("Query B")
+rows = cursor.execute("SELECT name, price FROM products").fetchall()
+for row in rows:
+    print(row)
+print()
+
+Query B output
+('Cement (bag)', 38000.0)
+('Iron Sheet 3m', 110000.0)
+('Paint 5L', 60000.0)
+('Nails 1kg', 12000.0)
+('Timber 2x4', 25000.0)
+
+#------- Query C --------------get the product with id 3
+print("Query C")
+rows = cursor.execute("SELECT * FROM products WHERE id = 3").fetchall()
+for row in rows:
+    print(row)
+print()
+
+Query C output
+(3, 'Paint 5L', 'Exterior wall paint white 5L', 60000.0)
+
+
+#------ Query D ---------------get all products whose name contains the word "sheet"
+print("Query D")
+rows = cursor.execute("SELECT * FROM products WHERE name LIKE '%sheet%'").fetchall()
+for row in rows:
+    print(row)
+print()
+
+Query D output
+(2, 'Iron Sheet 3m', 'Gauge 30 roofing sheet 3m long', 110000.0)
+
+#------- Query E ----------------get all products ordered by price from highest to lowest
+print("Query E")
+rows = cursor.execute("SELECT * FROM products ORDER BY price DESC").fetchall()
+for row in rows:
+    print(row)
+print()
+
+Query E output
+(2, 'Iron Sheet 3m', 'Gauge 30 roofing sheet 3m long', 110000.0)
+(3, 'Paint 5L', 'Exterior wall paint white 5L', 60000.0)
+(1, 'Cement (bag)', 'Portland cement 50kg bag', 38000.0)
+(5, 'Timber 2x4', 'Pine timber plank 2x4 per metre', 25000.0)
+(4, 'Nails 1kg', 'Common wire nails 1kg pack', 12000.0)
+
+#------- Query F ------------------get the two most expensive products
+print("Query F")
+rows = cursor.execute("SELECT * FROM products ORDER BY price DESC LIMIT 2").fetchall()
+for row in rows:
+    print(row)
+print()
+
+Query F
+(2, 'Iron Sheet 3m', 'Gauge 30 roofing sheet 3m long', 110000.0)
+(3, 'Paint 5L', 'Exterior wall paint white 5L', 60000.0)
+
+#-------- Query G ------------------ update the price of the product with id 1 to 38000 and then retrieve that product to confirm the update
+print("Query G")
+cursor.execute("UPDATE products SET price = 38000 WHERE id = 1")
+conn.commit()
+
+rows = cursor.execute("SELECT * FROM products WHERE id = 1").fetchall()
+for row in rows:
+    print(row)
+print()
+
+Query G
+(1, 'Cement (bag)', 'Portland cement 50kg bag', 38000.0)
+
+
+-------------------------------TASK 3 VULNERABILITY SEARCH---------------------------------------------------------------------
+-----vulnerabbl.py code-----------------
+import sqlite3
+
+conn = sqlite3.connect('nyondo_stock.db')
+
+def search_product(name):
+    query = f"SELECT * FROM products WHERE name LIKE '%{name}%'"
+    print(f"Query: {query}")
+    rows = conn.execute(query).fetchall()
+    print(f"Result: {rows}\n")
+    return rows
+
+def login(username, password):
+    query = f"SELECT * FROM users WHERE username='{username}' AND password='{password}'"
+    print(f"Query: {query}")
+    row = conn.execute(query).fetchone()
+    print(f"Result: {row}\n")
+    return row
+
+# Attack 1 - Dump all products
+print("Attack 1 - Dump all products")
+search_product("' OR 1=1--")
+
+# Attack 2 - Login bypass with no password
+print("Attack 2 - Login bypass with no password")
+login("admin'--", "anything")
+
+# Attack 3 - Always true login
+print("Attack 3 - Always true login")
+login("' OR '1'='1", "' OR '1'='1")
+
+# Attack 4 - UNION attack
+print("Attack 4 - UNION attack")
+search_product("' UNION SELECT id, username, password, role FROM users--")
+
+--------Query printed from terminal ---------------------------
+Attack 1 - Dump all products
+Query: SELECT * FROM products WHERE name LIKE '%' OR 1=1--%'
+
+Attack 2 - Login bypass with no password
+Query: SELECT * FROM users WHERE username='admin'--' AND password='anything'
+
+Attack 3 - Always true login
+Query: SELECT * FROM users WHERE username='' OR '1'='1' AND password='' OR '1'='1'
+
+Attack 4 - UNION attack
+Query: SELECT * FROM products WHERE name LIKE '%' UNION SELECT id, username, password, role FROM users--%'
+
+
+----------Attack resuts ------------------------------------------------------------------------------------
+Attack 1 - Dump all products
+Result: [(1, 'Cement (bag)', 'Portland cement 50kg bag', 35000.0), (2, 'Iron Sheet 3m', 'Gauge 30 roofing sheet 3m long', 110000.0), (3, 'Paint 5L', 'Exterior wall paint white 5L', 60000.0), (4, 'Nails 1kg', 'Common wire nails 1kg pack', 12000.0), (5, 'Timber 2x4', 'Pine timber plank 2x4 per metre', 25000.0)]
+
+Attack 2 - Login bypass with no password
+Result: (1, 'admin', 'admin123', 'admin')
+
+Attack 3 - Always true login
+Result: (1, 'admin', 'admin123', 'admin')
+
+Attack 4 - UNION attack
+Result: [(1, 'Cement (bag)', 'Portland cement 50kg bag', 35000.0), (1, 'admin', 'admin123', 'admin'), (2, 'Iron Sheet 3m', 'Gauge 30 roofing sheet 3m long', 110000.0), (2, 'fatuma', 'pass456', 'attendant'), (3, 'Paint 5L', 'Exterior wall paint white 5L', 60000.0), (3, 'wasswa', 'pass789', 'manager'), (4, 'Nails 1kg', 'Common wire nails 1kg pack', 12000.0), (5, 'Timber 2x4', 'Pine timber plank 2x4 per metre', 25000.0)]
+
+-----------Explaining why it worked -------------------------------------------------------------------------
+Attack 1, the attack worked because the input changed the search condition into something that is always true, so the database returned all products instead of just one match. 
+Attack 2, the attack worked because the password check was commented out, so the query logged in as admin without needing the correct password. 
+Attack 3, the attack worked because the login condition was changed into an always-true statement, so the database returned a user even though no valid credentials were provided. 
+Attack 4, the attack worked because UNION was used to add another SELECT query, which made the database return user account data through the product search. 
+
+
+-------------------TASK 4 ------------------------------------------------------------------------------------
+-----secure .py  code-------------------
+import sqlite3
+
+conn = sqlite3.connect('nyondo_stock.db')
+
+def search_product_safe(name):
+    query = "SELECT * FROM products WHERE name LIKE ?"
+    rows = conn.execute(query, (f"%{name}%",)).fetchall()
+    return rows
+
+def login_safe(username, password):
+    query = "SELECT * FROM users WHERE username = ? AND password = ?"
+    row = conn.execute(query, (username, password)).fetchone()
+    return row
+
+# These must ALL return [] or None when you run them
+print('Test 1:', search_product_safe("' OR 1=1--"))
+print('Test 2:', search_product_safe("' UNION SELECT id,username,password,role FROM users--"))
+print('Test 3:', login_safe("admin'--", 'anything'))
+print('Test 4:', login_safe("' OR '1'='1", "' OR '1'='1"))
+
+---------output--------------------------
+Test 1: []
+Test 2: []
+Test 3: None
+Test 4: None
+
+--------explanation ---------------------
+
+Using ? helps prevent SQL injection because the user input is treated as normal data, not as part of the SQL command. 
+This means even if someone types SQL code, the database will not run it as a command. With an f-string, the user input is inserted directly into the query, so it can change what the query does.
+A parameterized query keeps the SQL instruction separate from the user input, which makes it safer.
+The difference is that with an f-string, the input is inserted directly into the query, so it can change the meaning of the SQL. 
+But with a parameterized query, the SQL stays fixed and the values are passed separately, which makes it much safer.
