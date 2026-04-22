@@ -1,7 +1,7 @@
 import sqlite3
 
 conn = sqlite3.connect('nyondo_stock.db')
-cursor = conn.cursor()
+cursor = conn.cursor() # Create a cursor object to execute SQL queries
 
 # Query A get every column of every product
 print("Query A")
